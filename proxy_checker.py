@@ -103,7 +103,6 @@ def get_socks_version(host, port):
 
 #main
 
-host = aArgs[2]
 
 socks_ports = [
     1080,
@@ -115,19 +114,22 @@ http_ports = [
     8080,
 ]
 
-ip = socket.gethostbyname(host)
-kvirc.eval("echo \"Checking host %s ip %s!\"" % (host, ip));
-if check_dnsbl(ip):
-    kvirc.eval("echo \"Host %s is in dnsbl!\"" % host);
-    sys.exit()
-for port in socks_ports:
-    socks_version = get_socks_version(ip, port)
-    if socks_version:
-        kvirc.eval("echo \"Socks%s proxy detected!\"" % socks_version);
+try:
+    host = aArgs[2]
+    ip = socket.gethostbyname(host)
+    kvirc.eval("echo \"Checking host %s ip %s!\"" % (host, ip));
+    if check_dnsbl(ip):
+        kvirc.eval("echo \"Host %s is in dnsbl!\"" % host);
         sys.exit()
-for port in http_ports:
-    if check_http_proxy(ip, port):
-        kvirc.eval("echo \"HTTP proxy detected!\"");
-        sys.exit()
-kvirc.eval("echo \"Checking complete\"");                
-    
+    for port in socks_ports:
+        socks_version = get_socks_version(ip, port)
+        if socks_version:
+            kvirc.eval("echo \"Socks%s proxy detected!\"" % socks_version);
+            sys.exit()
+    for port in http_ports:
+        if check_http_proxy(ip, port):
+            kvirc.eval("echo \"HTTP proxy detected!\"");
+            sys.exit()
+    kvirc.eval("echo \"Checking complete\"");                
+except Exception, e:
+    kvirc.eval("echo \"exception: %s\"" % str(e));
